@@ -38,6 +38,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.telephony.TelephonyManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,13 +70,16 @@ public class PocketSphinxActivity extends Activity implements
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
 
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
+    TelephonyManager mTelephonyManager;
 
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
+        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
         // Prepare the data for UI
         captions = new HashMap<>();
@@ -89,14 +93,28 @@ public class PocketSphinxActivity extends Activity implements
                 .setText("Preparing the recognizer");
 
         // Check if user has given permission to record audio
-        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+        int permissionCheckAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
+        if (permissionCheckAudio != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            return;
+        }
+        if(permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
             return;
         }
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
         new SetupTask(this).execute();
+    }
+
+    private boolean isTelephonyEnabled() {
+        if (mTelephonyManager != null) {
+            if (mTelephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
