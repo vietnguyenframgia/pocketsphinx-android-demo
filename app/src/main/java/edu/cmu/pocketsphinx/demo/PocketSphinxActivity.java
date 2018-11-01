@@ -39,6 +39,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,11 +76,20 @@ public class PocketSphinxActivity extends Activity implements
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
     TelephonyManager mTelephonyManager;
+    private TextView textView;
+    private TextView textViewCall;
+    private Button btnCall;
+    private boolean isCalling = false;
 
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
+        //UI - Main
+        textView = findViewById(R.id.result_text);
+        textViewCall = findViewById(R.id.tvCall);
+        btnCall = findViewById(R.id.btn_call);
 
         // Prepare the data for UI
         captions = new HashMap<>();
@@ -90,15 +100,17 @@ public class PocketSphinxActivity extends Activity implements
         captions.put(FORECAST_SEARCH, R.string.forecast_caption);
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
-                .setText("Preparing the recognizer");
+                .setText("Preparing for Call Phone");
 
         // Check if user has given permission to record audio
         int permissionCheckAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
+
         if (permissionCheckAudio != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
+
         if(permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
             return;
@@ -106,6 +118,14 @@ public class PocketSphinxActivity extends Activity implements
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
         new SetupTask(this).execute();
+    }
+
+    private void checkisCalling(){
+        if(isCalling){
+            textViewCall.setText("Calling...");
+        }else{
+            textViewCall.setText("");
+        }
     }
 
     private boolean isTelephonyEnabled() {
@@ -158,6 +178,13 @@ public class PocketSphinxActivity extends Activity implements
                 finish();
             }
         }
+        if(requestCode == MY_PERMISSIONS_REQUEST_CALL_PHONE){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                new SetupTask(this).execute();
+            }else{
+                finish();
+            }
+        }
     }
 
     @Override
@@ -200,13 +227,14 @@ public class PocketSphinxActivity extends Activity implements
     public void onResult(Hypothesis hypothesis) {
         ((TextView) findViewById(R.id.result_text)).setText("");
         if (hypothesis != null) {
-            String text = hypothesis.getHypstr();
-            makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+            String text = hypothesis.getHypstr(); // data recognition
+            textView.setText(text);
         }
     }
 
     @Override
     public void onBeginningOfSpeech() {
+        Toast.makeText(PocketSphinxActivity.this, "Welcome to Speech Recognition ", Toast.LENGTH_LONG).show();
     }
 
     /**
