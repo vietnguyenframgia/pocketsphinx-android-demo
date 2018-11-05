@@ -71,7 +71,7 @@ public class PocketSphinxActivity extends Activity implements
     private static final String MENU_SEARCH = "menu";
 
     /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "oh mighty computer";
+    private static final String KEYPHRASE = "Hello";
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
@@ -80,7 +80,7 @@ public class PocketSphinxActivity extends Activity implements
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
     TelephonyManager mTelephonyManager;
-    private TextView textView;
+    private TextView tvResults;
     private TextView textViewCall;
     private Button btnCall;
     private Button btnReject;
@@ -92,7 +92,7 @@ public class PocketSphinxActivity extends Activity implements
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
         //UI - Main
-        textView = findViewById(R.id.result_text);
+        tvResults = findViewById(R.id.result_text);
         textViewCall = findViewById(R.id.tvCall);
         btnCall = findViewById(R.id.btn_call);
         btnReject = findViewById(R.id.btn_cancel);
@@ -151,6 +151,7 @@ public class PocketSphinxActivity extends Activity implements
         if (!TextUtils.isEmpty(phoneNumber)) {
             if (checkPermission(Manifest.permission.CALL_PHONE)) {
                 String dial = "tel :" + phoneNumber;
+                textViewCall.setText("Calling...."+ phoneNumber);
                 startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
             } else {
                 Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
@@ -159,6 +160,41 @@ public class PocketSphinxActivity extends Activity implements
             Toast.makeText(PocketSphinxActivity.this, "Enter a phone number", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void WakeUp(){
+        // make decisions for calling by sppech : "Calling to phone number : " Words
+        // Reject the dial
+    }
+
+    private void FeedBack(){
+        // the app will feedback for user "Ok" and "No" when calling
+    }
+
+    private void ReadPhoneNumber(){
+        // Phone Number
+    }
+
+    private void MakeDecision(){
+        // Calling and Cancel
+    }
+
+    private void CallingBySpeechRegcontion(){
+        WakeUp();
+        FeedBack();
+        ReadPhoneNumber();
+        MakeDecision();
+    }
+
+    private void GetData(){
+        String PhoneNumber ;
+        String Voice ;
+        String Data = tvResults.getText().toString();
+        for(int i = 0 ; i < Data.length() ; i++){
+            // get phone number
+        }
+    }
+
+
 
     private void CheckCallPhoneButton(){
         if (checkPermission(Manifest.permission.CALL_PHONE)) {
@@ -269,7 +305,7 @@ public class PocketSphinxActivity extends Activity implements
         ((TextView) findViewById(R.id.result_text)).setText("");
         if (hypothesis != null) {
             String text = hypothesis.getHypstr(); // data recognition
-            textView.setText(text);
+            tvResults.setText(text);
         }
     }
 
