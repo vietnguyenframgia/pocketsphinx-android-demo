@@ -32,13 +32,17 @@ package edu.cmu.pocketsphinx.demo;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,6 +83,7 @@ public class PocketSphinxActivity extends Activity implements
     private TextView textView;
     private TextView textViewCall;
     private Button btnCall;
+    private Button btnReject;
     private boolean isCalling = false;
 
     @Override
@@ -90,6 +95,7 @@ public class PocketSphinxActivity extends Activity implements
         textView = findViewById(R.id.result_text);
         textViewCall = findViewById(R.id.tvCall);
         btnCall = findViewById(R.id.btn_call);
+        btnReject = findViewById(R.id.btn_cancel);
 
         // Prepare the data for UI
         captions = new HashMap<>();
@@ -101,6 +107,23 @@ public class PocketSphinxActivity extends Activity implements
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing for Call Phone");
+
+        btnCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String phoneNumber = "0963638496";
+                CallPhone(phoneNumber);
+            }
+        });
+
+        btnReject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        isTelephoneEnabled();
+        CheckCallPhoneButton();
 
         // Check if user has given permission to record audio
         int permissionCheckAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
@@ -120,15 +143,33 @@ public class PocketSphinxActivity extends Activity implements
         new SetupTask(this).execute();
     }
 
-    private void checkisCalling(){
-        if(isCalling){
-            textViewCall.setText("Calling...");
-        }else{
-            textViewCall.setText("");
+    private boolean checkPermission(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void CallPhone(final String phoneNumber){
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            if (checkPermission(Manifest.permission.CALL_PHONE)) {
+                String dial = "tel :" + phoneNumber;
+                startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
+            } else {
+                Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(PocketSphinxActivity.this, "Enter a phone number", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private boolean isTelephonyEnabled() {
+    private void CheckCallPhoneButton(){
+        if (checkPermission(Manifest.permission.CALL_PHONE)) {
+            btnCall.setEnabled(true);
+        } else {
+            btnReject.setEnabled(false);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
+        }
+    }
+
+    private boolean isTelephoneEnabled() {
         if (mTelephonyManager != null) {
             if (mTelephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY) {
                 return true;
