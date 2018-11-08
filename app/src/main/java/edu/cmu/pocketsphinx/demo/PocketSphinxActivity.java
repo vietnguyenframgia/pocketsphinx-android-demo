@@ -60,7 +60,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
 
-public class PocketSphinxActivity extends Activity implements
+public class PocketSphinxActivity extends Activity implements View.OnClickListener,
         RecognitionListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
@@ -90,12 +90,14 @@ public class PocketSphinxActivity extends Activity implements
     public void onCreate(Bundle state) {
         super.onCreate(state);
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-
+        setContentView(R.layout.main);
         //UI - Main
         tvResults = findViewById(R.id.result_text);
         textViewCall = findViewById(R.id.tvCall);
         btnCall = findViewById(R.id.btn_call);
         btnReject = findViewById(R.id.btn_cancel);
+
+        btnCall.setOnClickListener(this);
 
         // Prepare the data for UI
         captions = new HashMap<>();
@@ -107,21 +109,6 @@ public class PocketSphinxActivity extends Activity implements
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing for Call Phone");
-
-        btnCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String phoneNumber = "0963638496";
-                CallPhone(phoneNumber);
-            }
-        });
-
-        btnReject.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
         isTelephoneEnabled();
         CheckCallPhoneButton();
 
@@ -212,6 +199,18 @@ public class PocketSphinxActivity extends Activity implements
             }
         }
         return false;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.btn_call:
+                String phoneNumber = "0963638496";
+                CallPhone(phoneNumber);
+                break;
+            default:
+                break;
+        }
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
