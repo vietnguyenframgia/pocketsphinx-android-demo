@@ -53,15 +53,17 @@
             android:layout_width="80dp"
             android:layout_marginBottom="2dp"
             android:layout_height="wrap_content"
-            android:layout_weight=""
+            android:layout_weight="2"
             />
         <Button
             android:id="@+id/btn_cancel"
             android:background="@drawable/cancel"
-            android:layout_marginLeft="60dp"
+            android:layout_marginRight="60dp"
             android:layout_marginBottom="2dp"
             android:layout_width="80dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            />
     </LinearLayout>
 
 </LinearLayout>
