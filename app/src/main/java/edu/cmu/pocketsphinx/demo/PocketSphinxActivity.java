@@ -91,8 +91,9 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         setContentView(R.layout.main);
+        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
         //UI - Main
         tvResults = findViewById(R.id.result_text);
         textViewCall = findViewById(R.id.tvCall);
@@ -110,7 +111,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         captions.put(DIGITS_SEARCH, R.string.digits_caption);
         captions.put(PHONE_SEARCH, R.string.phone_caption);
         captions.put(FORECAST_SEARCH, R.string.forecast_caption);
-        setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing for Call Phone");
 
@@ -178,8 +178,15 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         return false;
     }
 
-    private boolean FeedBack(){
+    private boolean FeedBack(Boolean isFeedBack){
         // the app will feedback for user "Ok" and "No" when calling
+        if(isFeedBack){
+            tvResults.setText("OK");
+            isFeedBack = true;
+        }else {
+            tvResults.setText("NO");
+            isFeedBack = false;
+        }
         return isFeedBack;
     }
 
@@ -199,23 +206,27 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     }
 
     private void CallingBySpeechRegcontion(){
-        GetData();
+        String results = GetData();
         boolean wake = WakeUp("Wake Up");
-        if(wake){
+        Boolean isFeedback = FeedBack(wake);
+        if(isFeedback){
             ReadPhoneNumber("0963638496");
             MakeDecision("Dial");
         }else {
-            FeedBack();
+            Toast.makeText(PocketSphinxActivity.this , "Plase check the device ", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void GetData(){
+    private String GetData(){
+        String Res = null;
         String PhoneNumber ;
         String Voice ;
         String Data = tvResults.getText().toString();
         for(int i = 0 ; i < Data.length() ; i++){
-            // get phone number
+            // get wake up , decision , feedback , phone number
+
         }
+        return Res;
     }
 
     private void CheckCallPhoneButton(){
@@ -340,7 +351,7 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
 
     @Override
     public void onBeginningOfSpeech() {
-        Toast.makeText(PocketSphinxActivity.this, "Welcome to Speech Recognition ", Toast.LENGTH_LONG).show();
+        //Toast.makeText(PocketSphinxActivity.this, "Welcome to Speech Recognition ", Toast.LENGTH_LONG).show();
     }
 
     /**
