@@ -159,7 +159,10 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
             if (checkPermission(Manifest.permission.CALL_PHONE)) {
                 String dial = "tel :" + phoneNumber;
                 textViewCall.setText("Calling...."+ phoneNumber);
-                startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
+                Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(dial));
+                callIntent.setData(Uri.parse(phoneNumber));
+                Intent chooser= Intent.createChooser(callIntent,"title");
+                startActivity(chooser);
             } else {
                 Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
             }
@@ -210,8 +213,14 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         boolean wake = WakeUp("Wake Up");
         Boolean isFeedback = FeedBack(wake);
         if(isFeedback){
-            ReadPhoneNumber("0963638496");
-            MakeDecision("Dial");
+            ReadPhoneNumber(results);
+            boolean decision = MakeDecision("Dial");
+            if(decision){
+                CallPhone(results);
+            }else {
+                return;
+            }
+
         }else {
             Toast.makeText(PocketSphinxActivity.this , "Plase check the device ", Toast.LENGTH_LONG).show();
         }
@@ -242,7 +251,7 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.btn_call:
-                String phoneNumber = "0963638496";
+                String phoneNumber = "+84963638496";
                 CallPhone(phoneNumber);
                 Toast.makeText(PocketSphinxActivity.this, "Hello CallPhone Function", Toast.LENGTH_LONG).show();
                 break;
