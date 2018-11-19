@@ -84,7 +84,7 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     private Button btnCall;
     private Button btnReject;
     private boolean isWakeUp = false;
-    private boolean isFeedBack = false;
+    private boolean FeedBack = false;
     private boolean Decision = false ;
 
 
@@ -171,71 +171,68 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         }
     }
 
-    private boolean WakeUp(String wakeup){
-        // make decisions for calling by sppech : "Calling to phone number : " Words
-        // Reject the dial
-        if(wakeup.equals("Wake Up")){
-            isFeedBack = true;
-            return isWakeUp;
-        }
-        return false;
-    }
-
-    private boolean FeedBack(Boolean isFeedBack){
+    private boolean FeedBack(Boolean wakeUp){
         // the app will feedback for user "Ok" and "No" when calling
-        if(isFeedBack){
+        if(wakeUp){
             tvResults.setText("OK");
-            isFeedBack = true;
+            FeedBack = true;
         }else {
             tvResults.setText("NO");
-            isFeedBack = false;
+            FeedBack = false;
         }
-        return isFeedBack;
+        return FeedBack;
     }
 
-    private void ReadPhoneNumber(String phoneNumber){
-        // Phone Number
-    }
-
-    private boolean MakeDecision(String decision){
-        // Calling and Cancel
-        if(decision.equals("Dial")){
-            Decision = true;
-        }
-        if(decision.equals("Cancel")){
-            Decision = false;
-        }
-        return Decision;
-    }
-
-    private void CallingBySpeechRegcontion(){
-        String results = GetData();
-        boolean wake = WakeUp("Wake Up");
-        Boolean isFeedback = FeedBack(wake);
+    private void CallingBySpeechRegcontion(Hypothesis hypothesis){
+        boolean wake = getDataForWakeUp(hypothesis);
+        boolean isFeedback = FeedBack(wake);
+        boolean decision;
+        String phonenumber = getPhoneNumber(hypothesis);
         if(isFeedback){
-            ReadPhoneNumber(results);
-            boolean decision = MakeDecision("Dial");
+            decision = makeDecisionForDial(hypothesis);
             if(decision){
-                CallPhone(results);
+                CallPhone(phonenumber);
             }else {
                 return;
             }
-
         }else {
-            Toast.makeText(PocketSphinxActivity.this , "Plase check the device ", Toast.LENGTH_LONG).show();
+            Toast.makeText(PocketSphinxActivity.this , "Please check the device ", Toast.LENGTH_LONG).show();
         }
     }
 
-    private String GetData(){
-        String Res = null;
-        String PhoneNumber ;
-        String Voice ;
-        String Data = tvResults.getText().toString();
-        for(int i = 0 ; i < Data.length() ; i++){
-            // get wake up , decision , feedback , phone number
-
+    private boolean getDataForWakeUp(Hypothesis hypothesis) {
+        boolean iswakeup = false;
+        String wakeup = hypothesis.getHypstr();
+        boolean results = recognizer.startListening(wakeup);
+        if(results){
+            if (wakeup.equals("wake up")) {
+                iswakeup = true;
+            }else {
+                iswakeup = false;
+            }
         }
-        return Res;
+        return iswakeup;
+    }
+
+    private boolean makeDecisionForDial(Hypothesis hypothesis){
+        // Calling and Cancel
+        boolean isDecision = false;
+        String decision = hypothesis.getHypstr();
+        boolean results = recognizer.startListening(decision);
+        if(results){
+            if(decision.equals("Dial")){
+                isDecision = true;
+            }
+            if(decision.equals("Cancel")){
+                isDecision = false;
+            }
+        }
+        return isDecision;
+    }
+
+    private String getPhoneNumber(Hypothesis hypothesis){
+        String phonenumber = hypothesis.getHypstr();
+        return phonenumber;
     }
 
     private void CheckCallPhoneButton(){
@@ -429,6 +426,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
 
     @Override
     public void onTimeout() {
-        //switchSearch(KWS_SEARCH);
+        switchSearch(KWS_SEARCH);
     }
 }
