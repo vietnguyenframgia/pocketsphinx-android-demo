@@ -67,6 +67,8 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     private static final String DIGITS_SEARCH = "digits";
     private static final String PHONE_SEARCH = "phones";
     private static final String MENU_SEARCH = "menu";
+    private static final String DIAL = "dial";
+    private static final String CANCEL = "cancel";
 
     /* Keyword we are looking for to activate menu */
     private static final String KEYPHRASE = "oh mighty computer";
@@ -74,7 +76,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
-    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
 
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
@@ -83,9 +84,8 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     private TextView textViewCall;
     private Button btnCall;
     private Button btnReject;
-    private boolean isWakeUp = false;
     private boolean FeedBack = false;
-    private boolean Decision = false ;
+    private Hypothesis speechData;
 
 
     @Override
@@ -110,7 +110,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         captions.put(MENU_SEARCH, R.string.menu_caption);
         captions.put(DIGITS_SEARCH, R.string.digits_caption);
         captions.put(PHONE_SEARCH, R.string.phone_caption);
-        captions.put(FORECAST_SEARCH, R.string.forecast_caption);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing for Call Phone");
 
@@ -121,7 +120,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         // Check if user has given permission to record audio
         int permissionCheckAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
-        int permissionCheckContact = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.READ_CONTACTS);
 
         if (permissionCheckAudio != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
@@ -131,10 +129,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         if(permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
             return;
-        }
-
-        if(permissionCheckContact != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
         }
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
@@ -205,7 +199,7 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         String wakeup = hypothesis.getHypstr();
         boolean results = recognizer.startListening(wakeup);
         if(results){
-            if (wakeup.equals("wake up")) {
+            if (wakeup.equals(KWS_SEARCH)) {
                 iswakeup = true;
             }else {
                 iswakeup = false;
@@ -220,10 +214,10 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         String decision = hypothesis.getHypstr();
         boolean results = recognizer.startListening(decision);
         if(results){
-            if(decision.equals("Dial")){
+            if(decision.equals(DIAL)){
                 isDecision = true;
             }
-            if(decision.equals("Cancel")){
+            if(decision.equals(CANCEL)){
                 isDecision = false;
             }
         }
@@ -337,8 +331,9 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
             switchSearch(DIGITS_SEARCH);
         else if (text.equals(PHONE_SEARCH))
             switchSearch(PHONE_SEARCH);
-        else if (text.equals(FORECAST_SEARCH))
-            switchSearch(FORECAST_SEARCH);
+        else if (text.equals("Wake Up")){
+            Toast.makeText(PocketSphinxActivity.this, "Welcome to Speech Recognition ", Toast.LENGTH_LONG).show();
+        }
         else
             ((TextView) findViewById(R.id.result_text)).setText(text);
     }
@@ -367,6 +362,16 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     public void onEndOfSpeech() {
         if (!recognizer.getSearchName().equals(KWS_SEARCH))
             switchSearch(KWS_SEARCH);
+    }
+
+    private void searchData(String voice , String key){
+        recognizer.stop();
+
+        if(voice.equals(key)){
+            recognizer.startListening(voice);
+        }else {
+            Toast.makeText(PocketSphinxActivity.this , "Can't detect the results" , Toast.LENGTH_LONG).show();
+        }
     }
 
     private void switchSearch(String searchName) {
