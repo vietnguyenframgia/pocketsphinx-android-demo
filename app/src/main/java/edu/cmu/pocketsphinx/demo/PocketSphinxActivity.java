@@ -74,7 +74,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
-    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
 
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
@@ -121,7 +120,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
         // Check if user has given permission to record audio
         int permissionCheckAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
-        int permissionCheckContact = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.READ_CONTACTS);
 
         if (permissionCheckAudio != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
@@ -133,9 +131,6 @@ public class PocketSphinxActivity extends Activity implements View.OnClickListen
             return;
         }
 
-        if(permissionCheckContact != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-        }
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
         new SetupTask(this).execute();
