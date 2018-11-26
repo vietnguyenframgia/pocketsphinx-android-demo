@@ -32,12 +32,18 @@ package edu.cmu.pocketsphinx.demo;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,9 +75,17 @@ public class PocketSphinxActivity extends Activity implements
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
 
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
+    TelephonyManager mTelephonyManager;
+
+    // UI
+    private Button btn_Call;
+    private Button btn_Cancel;
+    private TextView tv_Results;
+
 
     @Override
     public void onCreate(Bundle state) {
@@ -90,13 +104,20 @@ public class PocketSphinxActivity extends Activity implements
 
         // Check if user has given permission to record audio
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+        int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED && permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            return;
+        }
+        if(permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
             return;
         }
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
         new SetupTask(this).execute();
+        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
@@ -151,6 +172,117 @@ public class PocketSphinxActivity extends Activity implements
             recognizer.shutdown();
         }
     }
+
+    private boolean isTelephoneEnabled() {
+        if (mTelephonyManager != null) {
+            if (mTelephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkPermission(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void CallPhone(final String phoneNumber){
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            if (checkPermission(Manifest.permission.CALL_PHONE)) {
+                String dial = "tel :" + phoneNumber;
+                //textViewCall.setText("Calling...."+ phoneNumber);
+                Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(dial));
+                callIntent.setData(Uri.parse(phoneNumber));
+                Intent chooser= Intent.createChooser(callIntent,"title");
+                startActivity(chooser);
+            } else {
+                Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(PocketSphinxActivity.this, "Enter a phone number", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean FeedBack(Boolean wakeUp){
+        // the app will feedback for user "Ok" and "No" when calling
+        Boolean FeedBack = false;
+        if(wakeUp){
+            //tvResults.setText("OK");
+            FeedBack = true;
+        }else {
+            //tvResults.setText("NO");
+            FeedBack = false;
+        }
+        return FeedBack;
+    }
+
+    private void CallingBySpeechRegcontion(Hypothesis hypothesis){
+        boolean wake = getDataForWakeUp(hypothesis);
+        boolean isFeedback = FeedBack(wake);
+        boolean decision;
+        String phone_number = getPhoneNumber(hypothesis);
+        if(isFeedback){
+            decision = makeDecisionForDial(hypothesis);
+            if(decision){
+                CallPhone(phone_number);
+            }else {
+                return;
+            }
+        }else {
+            Toast.makeText(PocketSphinxActivity.this , "Please check the device ", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean getDataForWakeUp(Hypothesis hypothesis) {
+        boolean is_wakeup = false;
+        String wakeup = hypothesis.getHypstr();
+        boolean results = recognizer.startListening(wakeup);
+        if(results){
+            if (wakeup.equals("wake up")) {
+                is_wakeup = true;
+            }else {
+                is_wakeup = false;
+            }
+        }
+        return is_wakeup;
+    }
+
+    private boolean makeDecisionForDial(Hypothesis hypothesis){
+        // Calling and Cancel
+        boolean isDecision = false;
+        String decision = hypothesis.getHypstr();
+        boolean results = recognizer.startListening(decision);
+        if(results){
+            if(decision.equals("Dial")){
+                isDecision = true;
+            }
+            if(decision.equals("Cancel")){
+                isDecision = false;
+            }
+        }
+        return isDecision;
+    }
+
+    private String getPhoneNumber(Hypothesis hypothesis){
+        String phonenumber = hypothesis.getHypstr();
+        return phonenumber;
+    }
+
+//    @Override
+//    public void onClick(View view) {
+//        switch (view.getId()){
+//            case R.id.btn_call:
+//                String phoneNumber = "+84963638496";
+//                CallPhone(phoneNumber);
+//                Toast.makeText(PocketSphinxActivity.this, "Hello CallPhone Function", Toast.LENGTH_LONG).show();
+//                break;
+//            case R.id.btn_cancel:
+//                //recognizer.stop();
+//                break;
+//            default:
+//                break;
+//        }
+//    }
 
     /**
      * In partial result we get quick updates about current hypothesis. In
