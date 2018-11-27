@@ -5,7 +5,10 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:padding="16dp">
-
+<FrameLayout
+    android:layout_width="match_parent"
+    android:id="@+id/container"
+    android:layout_height="50dp"></FrameLayout>
     <TextView
         android:id="@+id/caption_text"
         android:layout_width="wrap_content"

@@ -32,6 +32,7 @@ package edu.cmu.pocketsphinx.demo;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -39,7 +40,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -61,7 +64,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 import static android.widget.Toast.makeText;
 
 public class PocketSphinxActivity extends Activity implements
-        RecognitionListener {
+        RecognitionListener, View.OnClickListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String KWS_SEARCH = "wakeup";
@@ -101,7 +104,8 @@ public class PocketSphinxActivity extends Activity implements
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
-
+        btn_Call  = findViewById(R.id.btn_call);
+        btn_Call.setOnClickListener(PocketSphinxActivity.this);
         // Check if user has given permission to record audio
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
@@ -119,7 +123,6 @@ public class PocketSphinxActivity extends Activity implements
         new SetupTask(this).execute();
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     }
-
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
         WeakReference<PocketSphinxActivity> activityReference;
         SetupTask(PocketSphinxActivity activity) {
@@ -268,21 +271,18 @@ public class PocketSphinxActivity extends Activity implements
         return phonenumber;
     }
 
-//    @Override
-//    public void onClick(View view) {
-//        switch (view.getId()){
-//            case R.id.btn_call:
-//                String phoneNumber = "+84963638496";
-//                CallPhone(phoneNumber);
-//                Toast.makeText(PocketSphinxActivity.this, "Hello CallPhone Function", Toast.LENGTH_LONG).show();
-//                break;
-//            case R.id.btn_cancel:
-//                //recognizer.stop();
-//                break;
-//            default:
-//                break;
-//        }
-//    }
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.btn_call:
+                FragmentTransaction ft =  getFragmentManager().beginTransaction();
+                ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
+                ft.commit();
+                break;
+            default:
+                break;
+        }
+    }
 
     /**
      * In partial result we get quick updates about current hypothesis. In
