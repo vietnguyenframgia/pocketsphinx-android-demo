@@ -5,10 +5,12 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:padding="16dp">
-<FrameLayout
-    android:layout_width="match_parent"
-    android:id="@+id/container"
-    android:layout_height="50dp"></FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
     <TextView
         android:id="@+id/caption_text"
         android:layout_width="wrap_content"
@@ -21,39 +23,24 @@
     <TextView
         android:id="@+id/result_text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
         android:hint="Phone number"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="40sp" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/dele" />
-
-        <Button
-            android:id="@+id/btn_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/contacts" />
-
-        <Button
             android:id="@+id/btn_call"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
             android:layout_gravity="center_vertical"
             android:background="@drawable/phone" />
-
-    </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>
