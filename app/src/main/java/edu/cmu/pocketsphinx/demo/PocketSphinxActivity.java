@@ -40,9 +40,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -72,9 +70,11 @@ public class PocketSphinxActivity extends Activity implements
     private static final String DIGITS_SEARCH = "digits";
     private static final String PHONE_SEARCH = "phones";
     private static final String MENU_SEARCH = "menu";
+    private static final String DIAL = "dial";
+    private static final String CANCEL = "cancel";
 
     /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "oh mighty computer";
+    private static final String KEYPHRASE = "wake up for dial";
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
@@ -86,8 +86,6 @@ public class PocketSphinxActivity extends Activity implements
 
     // UI
     private Button btn_Call;
-    private Button btn_Cancel;
-    private TextView tv_Results;
 
 
     @Override
@@ -104,6 +102,7 @@ public class PocketSphinxActivity extends Activity implements
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
+        // UI
         btn_Call  = findViewById(R.id.btn_call);
         btn_Call.setOnClickListener(PocketSphinxActivity.this);
         // Check if user has given permission to record audio
@@ -192,89 +191,39 @@ public class PocketSphinxActivity extends Activity implements
     private void CallPhone(final String phoneNumber){
         if (!TextUtils.isEmpty(phoneNumber)) {
             if (checkPermission(Manifest.permission.CALL_PHONE)) {
-                String dial = "tel :" + phoneNumber;
-                //textViewCall.setText("Calling...."+ phoneNumber);
+                String dial = phoneNumber;
                 Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(dial));
                 callIntent.setData(Uri.parse(phoneNumber));
-                Intent chooser= Intent.createChooser(callIntent,"title");
-                startActivity(chooser);
+                if (callIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(callIntent);
+                } else {
+                    //Toast.makeText(PocketSphinxActivity.this , "Can't Dial in this time" , Toast.LENGTH_LONG).show();
+                    ToatMessage("Can't Dial in this time");
+                }
             } else {
-                Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
+                ToatMessage("Permission Call Phone denied");
             }
         } else {
-            Toast.makeText(PocketSphinxActivity.this, "Enter a phone number", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(PocketSphinxActivity.this, "Enter your phone number", Toast.LENGTH_SHORT).show();
+            ToatMessage("Enter your phone number");
         }
     }
 
-    private boolean FeedBack(Boolean wakeUp){
-        // the app will feedback for user "Ok" and "No" when calling
-        Boolean FeedBack = false;
-        if(wakeUp){
-            //tvResults.setText("OK");
-            FeedBack = true;
-        }else {
-            //tvResults.setText("NO");
-            FeedBack = false;
-        }
-        return FeedBack;
+    private void ToatMessage(String message){
+        Toast.makeText(PocketSphinxActivity.this , message , Toast.LENGTH_LONG).show();
     }
 
-    private void CallingBySpeechRegcontion(Hypothesis hypothesis){
-        boolean wake = getDataForWakeUp(hypothesis);
-        boolean isFeedback = FeedBack(wake);
-        boolean decision;
-        String phone_number = getPhoneNumber(hypothesis);
-        if(isFeedback){
-            decision = makeDecisionForDial(hypothesis);
-            if(decision){
-                CallPhone(phone_number);
-            }else {
-                return;
-            }
-        }else {
-            Toast.makeText(PocketSphinxActivity.this , "Please check the device ", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private boolean getDataForWakeUp(Hypothesis hypothesis) {
-        boolean is_wakeup = false;
-        String wakeup = hypothesis.getHypstr();
-        boolean results = recognizer.startListening(wakeup);
-        if(results){
-            if (wakeup.equals("wake up")) {
-                is_wakeup = true;
-            }else {
-                is_wakeup = false;
-            }
-        }
-        return is_wakeup;
-    }
-
-    private boolean makeDecisionForDial(Hypothesis hypothesis){
-        // Calling and Cancel
-        boolean isDecision = false;
-        String decision = hypothesis.getHypstr();
-        boolean results = recognizer.startListening(decision);
-        if(results){
-            if(decision.equals("Dial")){
-                isDecision = true;
-            }
-            if(decision.equals("Cancel")){
-                isDecision = false;
-            }
-        }
-        return isDecision;
-    }
-
-    private String getPhoneNumber(Hypothesis hypothesis){
-        String phonenumber = hypothesis.getHypstr();
-        return phonenumber;
+    private void CallingBySpeechRegcontion(){
+        String phone_number = "+84963638486";
+        CallPhone(phone_number);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.btn_call:
+            case R.id.btn_dial:
+                CallingBySpeechRegcontion();
                 FragmentTransaction ft =  getFragmentManager().beginTransaction();
                 ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
                 ft.commit();
@@ -296,6 +245,7 @@ public class PocketSphinxActivity extends Activity implements
 
         String text = hypothesis.getHypstr();
         if (text.equals(KEYPHRASE))
+            // jump to new fragment
             switchSearch(MENU_SEARCH);
         else if (text.equals(DIGITS_SEARCH))
             switchSearch(DIGITS_SEARCH);
@@ -337,7 +287,7 @@ public class PocketSphinxActivity extends Activity implements
 
         // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
         if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName);
+            recognizer.startListening(searchName, 10000);
         else
             recognizer.startListening(searchName, 10000);
 

@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Phone Number"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:typeface="sans" />
 
@@ -36,11 +36,11 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_call"
+            android:id="@+id/btn_dial"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_centerInParent="true"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/phone" />
+            android:background="@drawable/speech-bubble" />
     </RelativeLayout>
 </LinearLayout>

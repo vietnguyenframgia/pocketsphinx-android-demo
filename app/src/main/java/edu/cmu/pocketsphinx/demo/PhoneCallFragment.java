@@ -1,7 +1,5 @@
 package edu.cmu.pocketsphinx.demo;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.Nullable;
@@ -20,10 +18,6 @@ public class PhoneCallFragment extends Fragment {
 
     public static PhoneCallFragment newInstance() {
         PhoneCallFragment fragment = new PhoneCallFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
         return fragment;
     }
 
@@ -43,7 +37,7 @@ public class PhoneCallFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.findViewById(R.id.btn_endCall).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.btn_Cancel_Call).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getActivity().getFragmentManager().popBackStackImmediate();

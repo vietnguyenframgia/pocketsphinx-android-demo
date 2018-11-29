@@ -10,7 +10,7 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@drawable/icon"
+        android:icon="@drawable/telephone-symbol-button"
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.DayNight">
         <activity
