@@ -52,7 +52,7 @@
                     android:id="@+id/btn_Cancel_Call"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
-                    android:background="@drawable/x-button" />
+                    android:background="@drawable/xbutton" />
 
             </LinearLayout>
 

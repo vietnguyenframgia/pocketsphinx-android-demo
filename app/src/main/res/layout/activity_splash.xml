@@ -7,9 +7,10 @@
     tools:context="edu.cmu.pocketsphinx.demo.SplashActivity">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/telephone-symbol-button"
+
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/telephone"
         android:layout_centerInParent="true" />
 
 </RelativeLayout>

@@ -74,7 +74,7 @@ public class PocketSphinxActivity extends Activity implements
     private static final String CANCEL = "cancel";
 
     /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "wake up for dial";
+    private static final String KEYPHRASE = "hello";
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
@@ -83,9 +83,6 @@ public class PocketSphinxActivity extends Activity implements
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
     TelephonyManager mTelephonyManager;
-
-    // UI
-    private Button btn_Call;
 
 
     @Override
@@ -103,17 +100,17 @@ public class PocketSphinxActivity extends Activity implements
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
         // UI
-        btn_Call  = findViewById(R.id.btn_call);
-        btn_Call.setOnClickListener(PocketSphinxActivity.this);
+
+        //btn_Call.setOnClickListener(PocketSphinxActivity.this);
         // Check if user has given permission to record audio
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CALL_PHONE);
+        int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE);
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED && permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
-        if(permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED){
+        if (permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
             return;
         }
@@ -122,11 +119,14 @@ public class PocketSphinxActivity extends Activity implements
         new SetupTask(this).execute();
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     }
+
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
         WeakReference<PocketSphinxActivity> activityReference;
+
         SetupTask(PocketSphinxActivity activity) {
             this.activityReference = new WeakReference<>(activity);
         }
+
         @Override
         protected Exception doInBackground(Void... params) {
             try {
@@ -138,6 +138,7 @@ public class PocketSphinxActivity extends Activity implements
             }
             return null;
         }
+
         @Override
         protected void onPostExecute(Exception result) {
             if (result != null) {
@@ -151,7 +152,7 @@ public class PocketSphinxActivity extends Activity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull  int[] grantResults) {
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
@@ -188,7 +189,7 @@ public class PocketSphinxActivity extends Activity implements
         return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void CallPhone(final String phoneNumber){
+    private void CallPhone(final String phoneNumber) {
         if (!TextUtils.isEmpty(phoneNumber)) {
             if (checkPermission(Manifest.permission.CALL_PHONE)) {
                 String dial = phoneNumber;
@@ -210,21 +211,21 @@ public class PocketSphinxActivity extends Activity implements
         }
     }
 
-    private void ToatMessage(String message){
-        Toast.makeText(PocketSphinxActivity.this , message , Toast.LENGTH_LONG).show();
+    private void ToatMessage(String message) {
+        Toast.makeText(PocketSphinxActivity.this, message, Toast.LENGTH_LONG).show();
     }
 
-    private void CallingBySpeechRegcontion(){
+    public void CallingBySpeechRegcontion() {
         String phone_number = "+84963638486";
         CallPhone(phone_number);
     }
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.btn_dial:
                 CallingBySpeechRegcontion();
-                FragmentTransaction ft =  getFragmentManager().beginTransaction();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
                 ft.commit();
                 break;
@@ -244,9 +245,13 @@ public class PocketSphinxActivity extends Activity implements
             return;
 
         String text = hypothesis.getHypstr();
-        if (text.equals(KEYPHRASE))
-            // jump to new fragment
-            switchSearch(MENU_SEARCH);
+        if (text.equals(KEYPHRASE)) {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.add(android.R.id.content, FirstFragment.newInstance()).addToBackStack(null);
+            ft.commit();
+        }
+        // jump to new fragment
+        //switchSearch(MENU_SEARCH);
         else if (text.equals(DIGITS_SEARCH))
             switchSearch(DIGITS_SEARCH);
         else if (text.equals(PHONE_SEARCH))
@@ -254,7 +259,11 @@ public class PocketSphinxActivity extends Activity implements
         else if (text.equals(FORECAST_SEARCH))
             switchSearch(FORECAST_SEARCH);
         else
-            ((TextView) findViewById(R.id.result_text)).setText(text);
+            try {
+                ((TextView) findViewById(R.id.result_text)).setText(text);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
     }
 
     /**
