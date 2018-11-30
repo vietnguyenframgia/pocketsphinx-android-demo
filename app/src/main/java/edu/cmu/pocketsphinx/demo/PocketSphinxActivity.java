@@ -70,11 +70,9 @@ public class PocketSphinxActivity extends Activity implements
     private static final String DIGITS_SEARCH = "digits";
     private static final String PHONE_SEARCH = "phones";
     private static final String MENU_SEARCH = "menu";
-    private static final String DIAL = "dial";
-    private static final String CANCEL = "cancel";
 
     /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "hello";
+    private static final String KEYPHRASE = "wake up";
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
@@ -95,7 +93,6 @@ public class PocketSphinxActivity extends Activity implements
         captions.put(MENU_SEARCH, R.string.menu_caption);
         captions.put(DIGITS_SEARCH, R.string.digits_caption);
         captions.put(PHONE_SEARCH, R.string.phone_caption);
-        captions.put(FORECAST_SEARCH, R.string.forecast_caption);
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
@@ -222,16 +219,16 @@ public class PocketSphinxActivity extends Activity implements
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btn_dial:
-                CallingBySpeechRegcontion();
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
-                ft.commit();
-                break;
-            default:
-                break;
-        }
+//        switch (view.getId()) {
+//            case R.id.btn_dial:
+//                CallingBySpeechRegcontion();
+//                FragmentTransaction ft = getFragmentManager().beginTransaction();
+//                ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
+//                ft.commit();
+//                break;
+//            default:
+//                break;
+//        }
     }
 
     /**
@@ -250,20 +247,7 @@ public class PocketSphinxActivity extends Activity implements
             ft.add(android.R.id.content, FirstFragment.newInstance()).addToBackStack(null);
             ft.commit();
         }
-        // jump to new fragment
-        //switchSearch(MENU_SEARCH);
-        else if (text.equals(DIGITS_SEARCH))
-            switchSearch(DIGITS_SEARCH);
-        else if (text.equals(PHONE_SEARCH))
-            switchSearch(PHONE_SEARCH);
-        else if (text.equals(FORECAST_SEARCH))
-            switchSearch(FORECAST_SEARCH);
-        else
-            try {
-                ((TextView) findViewById(R.id.result_text)).setText(text);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+            //((TextView) findViewById(R.id.result_text)).setText(text);
     }
 
     /**
@@ -271,7 +255,7 @@ public class PocketSphinxActivity extends Activity implements
      */
     @Override
     public void onResult(Hypothesis hypothesis) {
-        ((TextView) findViewById(R.id.result_text)).setText("");
+        //((TextView) findViewById(R.id.result_text)).setText("");
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();

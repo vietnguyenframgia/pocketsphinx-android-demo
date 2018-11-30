@@ -13,12 +13,12 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+
 
 public class FirstFragment extends Fragment implements
         RecognitionListener, View.OnClickListener{
@@ -28,6 +28,7 @@ public class FirstFragment extends Fragment implements
     private static final String MENU_SEARCH = "menu";
     private static final String DIGITS_SEARCH = "digits";
     private static final String KEYPHRASE = "wake up for dial";
+    private static final String DIAL = "dial";
 
     private SpeechRecognizer recognizer;
     private TextView resultText;
@@ -61,12 +62,6 @@ public class FirstFragment extends Fragment implements
         resultText = view.findViewById(R.id.result_text);
         btn_Call = view.findViewById(R.id.btn_dial);
         btn_Call.setOnClickListener(this);
-//        view.findViewById(R.id.btn_Cancel_Call).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                getActivity().getFragmentManager().popBackStackImmediate();
-//            }
-//        });
     }
 
     @Override
@@ -94,7 +89,7 @@ public class FirstFragment extends Fragment implements
         if (hypothesis == null)
             return;
         String text = hypothesis.getHypstr();
-        if (text.equals(KEYPHRASE)) {
+        if (text.equals(DIAL)) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
             ft.commit();
