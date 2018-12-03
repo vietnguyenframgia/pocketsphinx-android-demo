@@ -25,6 +25,8 @@
         <activity
             android:name=".PocketSphinxActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".DialActivity" />
+        <activity android:name=".CallingActivity"></activity>
     </application>
 
 </manifest>
