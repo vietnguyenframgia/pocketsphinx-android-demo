@@ -1,27 +1,17 @@
 package edu.cmu.pocketsphinx.demo;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -36,21 +26,12 @@ public class CallingActivity extends Activity implements
 
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String KWS_SEARCH = "wakeup";
-    private static final String FORECAST_SEARCH = "forecast";
-    private static final String DIGITS_SEARCH = "digits";
-    private static final String PHONE_SEARCH = "phones";
-    private static final String MENU_SEARCH = "menu";
+    private static final String CANCEL = "cancel";
 
-    /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "wake up";
-
-    /* Used to handle permission request */
-    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-    private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
 
     private SpeechRecognizer recognizer;
-    private HashMap<String, Integer> captions;
-    TelephonyManager mTelephonyManager;
+    private Button btn_cancel;
+    private TextView textPhoneNumber;
 
 
     @Override
@@ -58,29 +39,15 @@ public class CallingActivity extends Activity implements
         super.onCreate(state);
 
         // Prepare the data for UI
-        captions = new HashMap<>();
-        captions.put(KWS_SEARCH, R.string.kws_caption);
-        captions.put(MENU_SEARCH, R.string.menu_caption);
-        captions.put(DIGITS_SEARCH, R.string.digits_caption);
-        captions.put(PHONE_SEARCH, R.string.phone_caption);
-        setContentView(R.layout.main);
-        ((TextView) findViewById(R.id.caption_text))
-                .setText("Preparing the recognizer");
-        // UI
-
-        //btn_Call.setOnClickListener(PocketSphinxActivity.this);
-        // Check if user has given permission to record audio
-        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE);
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED && permissionCheckCallPhone != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
-            return;
-        }
-        // Recognizer initialization is a time-consuming and it involves IO,
-        // so we execute it in async task
+        setContentView(R.layout.activity_calling);
         new CallingActivity.SetupTask(this).execute();
-        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
+        btn_cancel = findViewById(R.id.btn_cancel);
+        btn_cancel.setOnClickListener(this);
+        textPhoneNumber = findViewById(R.id.txtPhoneNumber);
+        Intent intent = getIntent();
+        String PhoneNumber = intent.getStringExtra("Calling....");
+        textPhoneNumber.setText(PhoneNumber);
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
@@ -105,26 +72,10 @@ public class CallingActivity extends Activity implements
         @Override
         protected void onPostExecute(Exception result) {
             if (result != null) {
-                ((TextView) activityReference.get().findViewById(R.id.caption_text))
+                ((TextView) activityReference.get().findViewById(R.id.txtPhoneNumber))
                         .setText("Failed to init recognizer " + result);
             } else {
                 activityReference.get().switchSearch(KWS_SEARCH);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Recognizer initialization is a time-consuming and it involves IO,
-                // so we execute it in async task
-                new CallingActivity.SetupTask(this).execute();
-            } else {
-                finish();
             }
         }
     }
@@ -139,62 +90,20 @@ public class CallingActivity extends Activity implements
         }
     }
 
-    private boolean isTelephoneEnabled() {
-        if (mTelephonyManager != null) {
-            if (mTelephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean checkPermission(String permission) {
-        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void CallPhone(final String phoneNumber) {
-        if (!TextUtils.isEmpty(phoneNumber)) {
-            if (checkPermission(Manifest.permission.CALL_PHONE)) {
-                String dial = phoneNumber;
-                Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(dial));
-                callIntent.setData(Uri.parse(phoneNumber));
-                if (callIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(callIntent);
-                } else {
-                    //Toast.makeText(PocketSphinxActivity.this , "Can't Dial in this time" , Toast.LENGTH_LONG).show();
-                    ToatMessage("Can't Dial in this time");
-                }
-            } else {
-                //Toast.makeText(PocketSphinxActivity.this, "Permission Call Phone denied", Toast.LENGTH_SHORT).show();
-                ToatMessage("Permission Call Phone denied");
-            }
-        } else {
-            //Toast.makeText(PocketSphinxActivity.this, "Enter your phone number", Toast.LENGTH_SHORT).show();
-            ToatMessage("Enter your phone number");
-        }
-    }
-
-    private void ToatMessage(String message) {
-        Toast.makeText(CallingActivity.this, message, Toast.LENGTH_LONG).show();
-    }
-
-    public void CallingBySpeechRegcontion() {
-        String phone_number = "+84963638486";
-        CallPhone(phone_number);
-    }
-
     @Override
     public void onClick(View view) {
-//        switch (view.getId()) {
-//            case R.id.btn_dial:
-//                CallingBySpeechRegcontion();
-//                FragmentTransaction ft = getFragmentManager().beginTransaction();
-//                ft.add(android.R.id.content, PhoneCallFragment.newInstance()).addToBackStack(null);
-//                ft.commit();
-//                break;
-//            default:
-//                break;
-//        }
+        switch (view.getId()) {
+            case R.id.btn_cancel:
+                recognizer.stop();
+                recognizer.cancel();
+                recognizer.shutdown();
+                Intent startIntent = new Intent(this, DialActivity.class);
+                startActivity(startIntent);
+                finish();
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -208,12 +117,14 @@ public class CallingActivity extends Activity implements
             return;
 
         String text = hypothesis.getHypstr();
-        if (text.equals(KEYPHRASE)) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(android.R.id.content, FirstFragment.newInstance()).addToBackStack(null);
-            ft.commit();
+        if (text.equals(CANCEL)) {
+            recognizer.stop();
+            recognizer.cancel();
+            recognizer.shutdown();
+            Intent pocketIntent = new Intent(CallingActivity.this, PocketSphinxActivity.class);
+            startActivity(pocketIntent);
+            finish();
         }
-        //((TextView) findViewById(R.id.result_text)).setText(text);
     }
 
     /**
@@ -221,7 +132,6 @@ public class CallingActivity extends Activity implements
      */
     @Override
     public void onResult(Hypothesis hypothesis) {
-        //((TextView) findViewById(R.id.result_text)).setText("");
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
@@ -249,15 +159,9 @@ public class CallingActivity extends Activity implements
             recognizer.startListening(searchName, 10000);
         else
             recognizer.startListening(searchName, 10000);
-
-        String caption = getResources().getString(captions.get(searchName));
-        ((TextView) findViewById(R.id.caption_text)).setText(caption);
     }
 
     private void setupRecognizer(File assetsDir) throws IOException {
-        // The recognizer can be configured to perform multiple searches
-        // of different kind and switch between them
-
         recognizer = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                 .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
@@ -267,33 +171,13 @@ public class CallingActivity extends Activity implements
                 .getRecognizer();
         recognizer.addListener(this);
 
-        /* In your application you might not need to add all those searches.
-          They are added here for demonstration. You can leave just one.
-         */
-
         // Create keyword-activation search.
-        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-
-        // Create grammar-based search for selection between demos
-        File menuGrammar = new File(assetsDir, "menu.gram");
-        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-
-        // Create grammar-based search for digit recognition
-        File digitsGrammar = new File(assetsDir, "digits.gram");
-        recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
-
-        // Create language model search
-        File languageModel = new File(assetsDir, "weather.dmp");
-        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
-
-        // Phonetic search
-        File phoneticModel = new File(assetsDir, "en-phone.dmp");
-        recognizer.addAllphoneSearch(PHONE_SEARCH, phoneticModel);
+        recognizer.addKeyphraseSearch(KWS_SEARCH, CANCEL);
     }
 
     @Override
     public void onError(Exception error) {
-        ((TextView) findViewById(R.id.caption_text)).setText(error.getMessage());
+        ((TextView) findViewById(R.id.txtPhoneNumber)).setText(error.getMessage());
     }
 
     @Override

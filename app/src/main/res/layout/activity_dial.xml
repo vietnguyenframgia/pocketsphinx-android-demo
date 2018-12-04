@@ -13,7 +13,7 @@
         android:layout_height="50dp" />
 
     <TextView
-        android:id="@+id/caption_text"
+        android:id="@+id/dial_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -42,6 +42,6 @@
             android:layout_height="64dp"
             android:layout_centerInParent="true"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/speechbubble" />
+            android:background="@drawable/telephone" />
     </RelativeLayout>
 </LinearLayout>
