@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -17,7 +18,6 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -26,7 +26,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 
-public class DialActivity extends Activity implements
+public class DialActivity extends AppCompatActivity implements
         RecognitionListener, View.OnClickListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
@@ -207,7 +207,7 @@ public class DialActivity extends Activity implements
                 .getRecognizer();
         recognizer.addListener(this);
 
-        recognizer.addKeyphraseSearch(KWS_SEARCH, DIAL);
+        recognizer.addKeyphraseSearch(KWS_SEARCH, READ_PHONE);
         // Create grammar-based search for digit recognition
         File digitsGrammar = new File(assetsDir, "digits.gram");
         recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,7 +22,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
 
-public class CallingActivity extends Activity implements
+public class CallingActivity extends AppCompatActivity implements
         RecognitionListener, View.OnClickListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
