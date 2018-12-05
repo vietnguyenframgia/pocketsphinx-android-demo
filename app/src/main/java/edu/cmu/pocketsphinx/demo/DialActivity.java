@@ -13,7 +13,9 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +35,7 @@ public class DialActivity extends AppCompatActivity implements
     private static final String KWS_SEARCH = "wake up";
     private static final String DIGITS_SEARCH = "digits";
     private static final String DIAL = "dial";
-    private static final String READ_PHONE = "read my phone";
+    private static final String READ_DIGIT = "number";
 
     private SpeechRecognizer recognizer;
     TelephonyManager mTelephonyManager;
@@ -55,7 +57,7 @@ public class DialActivity extends AppCompatActivity implements
         txtResults = findViewById(R.id.result_text);
         txtCaption = findViewById(R.id.dial_text);
 
-        txtCaption.setText("To Say Your Phone Number");
+        txtCaption.setText("Say : number");
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
@@ -126,12 +128,17 @@ public class DialActivity extends AppCompatActivity implements
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_dial:
-                String phone_number = txtResults.getText().toString();
-                CallPhone(phone_number);
-                Intent callingIntent = new Intent(this, CallingActivity.class);
-                callingIntent.putExtra("Calling...." , phone_number);
-                startActivity(callingIntent);
-                finish();
+                if(!isTelephoneEnabled()){
+                    String phone_number = txtResults.getText().toString();
+                    //CallPhone(phone_number);
+                    Intent callingIntent = new Intent(this, CallingActivity.class);
+                    callingIntent.putExtra("" , phone_number);
+                    startActivity(callingIntent);
+                    finish();
+                }else {
+                    Toast.makeText(DialActivity.this, "FALSE" , Toast.LENGTH_LONG).show();
+                }
+
                 break;
             default:
                 break;
@@ -149,9 +156,13 @@ public class DialActivity extends AppCompatActivity implements
             return;
 
         String text = hypothesis.getHypstr();
-        if (text.equals(READ_PHONE)) {
+        if (text.equals(READ_DIGIT)) {
+            recognizer.stop();
+            Toast.makeText(DialActivity.this, "READ DIGITS" , Toast.LENGTH_LONG).show();
+            txtCaption.setText("To Say Your Phone Number");
             switchSearch(DIGITS_SEARCH);
         } else if (text.equals(DIAL)) {
+            Toast.makeText(DialActivity.this, "DIAL" , Toast.LENGTH_LONG).show();
             recognizer.stop();
             Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
             startActivity(intentCalling);
@@ -167,6 +178,7 @@ public class DialActivity extends AppCompatActivity implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             txtResults.setText(text);
+            //Toast.makeText(DialActivity.this, text , Toast.LENGTH_LONG).show();
         }
     }
 
@@ -188,9 +200,9 @@ public class DialActivity extends AppCompatActivity implements
 
         // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
         if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName, 10000);
+            recognizer.startListening(searchName);
         else
-            recognizer.startListening(searchName, 10000);
+            recognizer.startListening(searchName);
 
     }
 
@@ -207,7 +219,7 @@ public class DialActivity extends AppCompatActivity implements
                 .getRecognizer();
         recognizer.addListener(this);
 
-        recognizer.addKeyphraseSearch(KWS_SEARCH, READ_PHONE);
+        recognizer.addKeyphraseSearch(KWS_SEARCH, READ_DIGIT);
         // Create grammar-based search for digit recognition
         File digitsGrammar = new File(assetsDir, "digits.gram");
         recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
@@ -216,7 +228,8 @@ public class DialActivity extends AppCompatActivity implements
 
     @Override
     public void onError(Exception error) {
-        ((TextView) findViewById(R.id.result_text)).setText(error.getMessage());
+        Toast.makeText(DialActivity.this, "ERROR" , Toast.LENGTH_LONG).show();
+
     }
 
     @Override

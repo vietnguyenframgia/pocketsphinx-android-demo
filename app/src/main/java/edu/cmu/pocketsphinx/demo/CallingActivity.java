@@ -1,6 +1,5 @@
 package edu.cmu.pocketsphinx.demo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,8 +18,6 @@ import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
-
-import static android.widget.Toast.makeText;
 
 public class CallingActivity extends AppCompatActivity implements
         RecognitionListener, View.OnClickListener {
@@ -47,7 +44,7 @@ public class CallingActivity extends AppCompatActivity implements
         btn_cancel.setOnClickListener(this);
         textPhoneNumber = findViewById(R.id.txtPhoneNumber);
         Intent intent = getIntent();
-        String PhoneNumber = intent.getStringExtra("Calling....");
+        String PhoneNumber = intent.getStringExtra("");
         textPhoneNumber.setText(PhoneNumber);
     }
 
@@ -120,8 +117,6 @@ public class CallingActivity extends AppCompatActivity implements
         String text = hypothesis.getHypstr();
         if (text.equals(CANCEL)) {
             recognizer.stop();
-            recognizer.cancel();
-            recognizer.shutdown();
             Intent pocketIntent = new Intent(CallingActivity.this, PocketSphinxActivity.class);
             startActivity(pocketIntent);
             finish();
@@ -135,7 +130,8 @@ public class CallingActivity extends AppCompatActivity implements
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
-            makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+            Toast.makeText(CallingActivity.this, text , Toast.LENGTH_LONG).show();
+
         }
     }
 
@@ -157,7 +153,7 @@ public class CallingActivity extends AppCompatActivity implements
 
         // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
         if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName, 10000);
+            recognizer.startListening(searchName);
         else
             recognizer.startListening(searchName, 10000);
     }

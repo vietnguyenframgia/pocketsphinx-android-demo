@@ -17,9 +17,10 @@
             android:layout_gravity="center">
 
         <TextView
+            android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Calling"
+            android:text="Calling..."
             android:textColor="#000"
             android:textSize="40dp"
             android:textStyle="bold" />
@@ -35,6 +36,7 @@
                 tools:ignore="Suspicious0dp">
 
             <TextView
+                android:layout_marginBottom="20dp"
                 android:id="@+id/txtPhoneNumber"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center"
-                android:layout_weight="0.23">
+                android:layout_weight="0.4">
 
             <Button
                 android:id="@+id/btn_cancel"

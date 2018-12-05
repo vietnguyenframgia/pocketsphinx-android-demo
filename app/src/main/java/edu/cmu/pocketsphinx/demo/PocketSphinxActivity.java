@@ -76,7 +76,7 @@ public class PocketSphinxActivity extends AppCompatActivity implements
         // Prepare the data for UI
         setContentView(R.layout.main);
         txtWelcome = findViewById(R.id.text_welcome);
-        txtWelcome.setText("Say to start : Wake up for dial ");
+        txtWelcome.setText("Say to start : Wake me up");
         // Check if user has given permission to record audio
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE);
@@ -190,7 +190,7 @@ public class PocketSphinxActivity extends AppCompatActivity implements
 
         // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
         if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName, 10000);
+            recognizer.startListening(searchName);
         else
             recognizer.startListening(searchName, 10000);
     }
