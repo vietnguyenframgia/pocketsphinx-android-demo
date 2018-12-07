@@ -1,9 +1,15 @@
 package edu.cmu.pocketsphinx.demo;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -116,10 +122,16 @@ public class CallingActivity extends AppCompatActivity implements
 
         String text = hypothesis.getHypstr();
         if (text.equals(CANCEL)) {
+            Toast.makeText(CallingActivity.this , "Call End" , Toast.LENGTH_LONG).show();
             recognizer.stop();
-            Intent pocketIntent = new Intent(CallingActivity.this, PocketSphinxActivity.class);
-            startActivity(pocketIntent);
-            finish();
+            final Intent pocketIntent = new Intent(CallingActivity.this, PocketSphinxActivity.class);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startActivity(pocketIntent);
+                    finish();
+                }
+            }, 3000);
         }
     }
 
@@ -130,8 +142,6 @@ public class CallingActivity extends AppCompatActivity implements
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
-            Toast.makeText(CallingActivity.this, text , Toast.LENGTH_LONG).show();
-
         }
     }
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Date;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -131,10 +134,10 @@ public class DialActivity extends AppCompatActivity implements
                 if(!isTelephoneEnabled()){
                     String phone_number = txtResults.getText().toString();
                     //CallPhone(phone_number);
-                    Intent callingIntent = new Intent(this, CallingActivity.class);
-                    callingIntent.putExtra("" , phone_number);
-                    startActivity(callingIntent);
-                    finish();
+//                    Intent callingIntent = new Intent(this, CallingActivity.class);
+//                    callingIntent.putExtra("" , phone_number);
+//                    startActivity(callingIntent);
+//                    finish();
                 }else {
                     Toast.makeText(DialActivity.this, "FALSE" , Toast.LENGTH_LONG).show();
                 }
@@ -161,13 +164,51 @@ public class DialActivity extends AppCompatActivity implements
             Toast.makeText(DialActivity.this, "READ DIGITS" , Toast.LENGTH_LONG).show();
             txtCaption.setText("To Say Your Phone Number");
             switchSearch(DIGITS_SEARCH);
-        } else if (text.equals(DIAL)) {
-            Toast.makeText(DialActivity.this, "DIAL" , Toast.LENGTH_LONG).show();
-            recognizer.stop();
-            Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
-            startActivity(intentCalling);
-            finish();
         }
+    }
+
+    private String DataProcess(String number){
+        String phoneNumber = "" ;
+        String text = "" ;
+        String[] arrPhone = number.split(" ");
+        for(int i = 0 ; i < arrPhone.length ; i++) {
+            switch (arrPhone[i]) {
+                case "zero":
+                    text = "+84";
+                    break;
+                case "one":
+                    text = "1";
+                    break;
+                case "two":
+                    text = "2";
+                    break;
+                case "three":
+                    text = "3";
+                    break;
+                case "four":
+                    text = "4";
+                    break;
+                case "five":
+                    text = "5";
+                    break;
+                case "six":
+                    text = "6";
+                    break;
+                case "seven":
+                    text = "7";
+                    break;
+                case "eight":
+                    text = "8";
+                    break;
+                case "nice":
+                    text = "9";
+                    break;
+                default:
+                    break;
+            }
+            phoneNumber = phoneNumber + text;
+        }
+        return phoneNumber;
     }
 
     /**
@@ -177,8 +218,23 @@ public class DialActivity extends AppCompatActivity implements
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
-            txtResults.setText(text);
-            //Toast.makeText(DialActivity.this, text , Toast.LENGTH_LONG).show();
+            String PhoneNumber = DataProcess(text);
+            txtResults.setText(PhoneNumber);
+            int number = text.length();
+            if(number >= 10){
+                recognizer.stop();
+                final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
+                intentCalling.putExtra("" , PhoneNumber);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(intentCalling);
+                        finish();
+                    }
+                }, 3000);
+            }else {
+                switchSearch(DIGITS_SEARCH);
+            }
         }
     }
 
