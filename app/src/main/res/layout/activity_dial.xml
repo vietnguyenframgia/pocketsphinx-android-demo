@@ -24,7 +24,7 @@
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
-        android:text="+84963638496"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="40sp" />
 

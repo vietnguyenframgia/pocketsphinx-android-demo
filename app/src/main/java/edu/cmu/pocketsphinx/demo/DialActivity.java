@@ -174,7 +174,7 @@ public class DialActivity extends AppCompatActivity implements
         for(int i = 0 ; i < arrPhone.length ; i++) {
             switch (arrPhone[i]) {
                 case "zero":
-                    text = "+84";
+                    text = "0";
                     break;
                 case "one":
                     text = "1";
@@ -220,7 +220,7 @@ public class DialActivity extends AppCompatActivity implements
             String text = hypothesis.getHypstr();
             String PhoneNumber = DataProcess(text);
             txtResults.setText(PhoneNumber);
-            int number = text.length();
+            int number = PhoneNumber.length();
             if(number >= 10){
                 recognizer.stop();
                 final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
