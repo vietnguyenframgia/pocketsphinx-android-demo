@@ -36,6 +36,7 @@ public class CallingActivity extends AppCompatActivity implements
     private SpeechRecognizer recognizer;
     private Button btn_cancel;
     private TextView textPhoneNumber;
+    private TextView textNetwork;
 
 
     @Override
@@ -49,9 +50,21 @@ public class CallingActivity extends AppCompatActivity implements
         btn_cancel = findViewById(R.id.btn_cancel);
         btn_cancel.setOnClickListener(this);
         textPhoneNumber = findViewById(R.id.txtPhoneNumber);
+        textNetwork = findViewById(R.id.txtNetwork);
         Intent intent = getIntent();
         String PhoneNumber = intent.getStringExtra("");
         textPhoneNumber.setText(PhoneNumber);
+        String is_network = CheckNetworkHome(GetHeadNumber(PhoneNumber));
+        textNetwork.setText( "Network : "+ is_network);
+    }
+
+    private String GetHeadNumber(String PhoneNumber){
+        String NumberHead = "";
+        String[] data = PhoneNumber.split("");
+        for(int i = 0 ; i < 2 ; i++){
+           NumberHead += data[i];
+        }
+        return NumberHead;
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
@@ -108,6 +121,20 @@ public class CallingActivity extends AppCompatActivity implements
             default:
                 break;
         }
+    }
+
+    private String CheckNetworkHome(String head){
+        String headNumber = "";
+        if(head.equals("03") || head.equals("097") || head.equals("098") || head.equals("096") || head.equals("086")){
+            headNumber = "Vietel Network" ;
+        }else if(head.equals("07")|| head.equals("089") || head.equals("090") || head.equals("093") ){
+            headNumber = "Mobifone Network";
+        }else if(head.equals("08")|| head.equals("088") || head.equals("094") || head.equals("091") ){
+            headNumber = "Vinaphone Network";
+        }else {
+            headNumber = "Unknown Network";
+        }
+        return headNumber;
     }
 
     /**

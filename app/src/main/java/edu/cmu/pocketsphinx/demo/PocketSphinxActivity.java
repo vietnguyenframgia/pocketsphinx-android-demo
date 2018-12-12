@@ -76,7 +76,7 @@ public class PocketSphinxActivity extends AppCompatActivity implements
         // Prepare the data for UI
         setContentView(R.layout.main);
         txtWelcome = findViewById(R.id.text_welcome);
-        txtWelcome.setText("Say to start : Wake me up");
+        txtWelcome.setText("Nói :[ Wake me up ] "+"Để bắt đầu" );
         // Check if user has given permission to record audio
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         int permissionCheckCallPhone = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE);

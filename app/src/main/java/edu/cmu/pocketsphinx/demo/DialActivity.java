@@ -60,7 +60,7 @@ public class DialActivity extends AppCompatActivity implements
         txtResults = findViewById(R.id.result_text);
         txtCaption = findViewById(R.id.dial_text);
 
-        txtCaption.setText("Say : number");
+        txtCaption.setText("Nói:[ number ] để bắt đầu đọc số");
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
@@ -162,7 +162,7 @@ public class DialActivity extends AppCompatActivity implements
         if (text.equals(READ_DIGIT)) {
             recognizer.stop();
             Toast.makeText(DialActivity.this, "READ DIGITS" , Toast.LENGTH_LONG).show();
-            txtCaption.setText("To Say Your Phone Number");
+            txtCaption.setText("Đọc số điện thoại của bạn (Tiếng Anh)");
             switchSearch(DIGITS_SEARCH);
         }
     }

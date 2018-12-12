@@ -37,10 +37,11 @@
                 tools:ignore="Suspicious0dp">
 
             <TextView
+                android:id="@+id/txtNetwork"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Say: cancel to end"
+                android:text=""
                 android:textSize="25dp"
                 android:textColor="#f000"
                 />
