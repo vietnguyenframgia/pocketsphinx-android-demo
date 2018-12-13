@@ -171,7 +171,7 @@ public class DialActivity extends AppCompatActivity implements
         String phoneNumber = "" ;
         String text = "" ;
         String[] arrPhone = number.split(" ");
-        for(int i = 0 ; i < arrPhone.length ; i++) {
+        for(int i = 1 ; i < arrPhone.length ; i++) {
             switch (arrPhone[i]) {
                 case "zero":
                     text = "0";
@@ -206,9 +206,22 @@ public class DialActivity extends AppCompatActivity implements
                 default:
                     break;
             }
-            phoneNumber = phoneNumber + text;
+            phoneNumber = "+84" + phoneNumber + text;
         }
+
         return phoneNumber;
+    }
+
+    private boolean CheckHeadNumber(String number){
+        boolean is_ok = false;
+        String headNumber = number ;
+        String[] arrPhone = number.split("");
+        if(arrPhone[0].equals("0")){
+            is_ok = true;
+        }else{
+            is_ok = false;
+        }
+        return is_ok;
     }
 
     /**
@@ -219,19 +232,23 @@ public class DialActivity extends AppCompatActivity implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             String PhoneNumber = DataProcess(text);
-            txtResults.setText(PhoneNumber);
-            int number = PhoneNumber.length();
-            if(number >= 10){
-                recognizer.stop();
-                final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
-                intentCalling.putExtra("" , PhoneNumber);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(intentCalling);
-                        finish();
-                    }
-                }, 3000);
+            if(CheckHeadNumber(PhoneNumber)){
+                txtResults.setText(PhoneNumber);
+                int number = PhoneNumber.length();
+                if(number >= 10){
+                    recognizer.stop();
+                    final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
+                    intentCalling.putExtra("" , PhoneNumber);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startActivity(intentCalling);
+                            finish();
+                        }
+                    }, 3000);
+                }else {
+                    switchSearch(DIGITS_SEARCH);
+                }
             }else {
                 switchSearch(DIGITS_SEARCH);
             }

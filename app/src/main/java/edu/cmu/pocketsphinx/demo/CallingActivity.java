@@ -126,13 +126,13 @@ public class CallingActivity extends AppCompatActivity implements
     private String CheckNetworkHome(String head){
         String headNumber = "";
         if(head.equals("03") || head.equals("097") || head.equals("098") || head.equals("096") || head.equals("086")){
-            headNumber = "Vietel Network" ;
+            headNumber = "Vietel Network" + "cước phí 1300p";
         }else if(head.equals("07")|| head.equals("089") || head.equals("090") || head.equals("093") ){
-            headNumber = "Mobifone Network";
+            headNumber = "Mobifone Network" + "cước phí 1500p";
         }else if(head.equals("08")|| head.equals("088") || head.equals("094") || head.equals("091") ){
-            headNumber = "Vinaphone Network";
+            headNumber = "Vinaphone Network" + "cước phí 1400p";
         }else {
-            headNumber = "Unknown Network";
+            headNumber = "Unknown Network" + "cước phí ?";
         }
         return headNumber;
     }
