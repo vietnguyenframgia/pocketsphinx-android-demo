@@ -7,9 +7,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,14 +32,14 @@ public class CallingActivity extends AppCompatActivity implements
 
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String KWS_SEARCH = "wakeup";
-    private static final String CANCEL = "cancel";
+    private static final String DIAL = "dial";
 
 
     private SpeechRecognizer recognizer;
-    private Button btn_cancel;
+    private Button btn_dial;
     private TextView textPhoneNumber;
     private TextView textNetwork;
-
+    String PhoneNumber;
 
     @Override
     public void onCreate(Bundle state) {
@@ -47,24 +49,37 @@ public class CallingActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_calling);
         new CallingActivity.SetupTask(this).execute();
 
-        btn_cancel = findViewById(R.id.btn_cancel);
-        btn_cancel.setOnClickListener(this);
+        btn_dial = findViewById(R.id.btn_dial);
+        btn_dial.setOnClickListener(this);
         textPhoneNumber = findViewById(R.id.txtPhoneNumber);
         textNetwork = findViewById(R.id.txtNetwork);
         Intent intent = getIntent();
-        String PhoneNumber = intent.getStringExtra("");
+        PhoneNumber = intent.getStringExtra("phoneNumber");
         textPhoneNumber.setText(PhoneNumber);
         String is_network = CheckNetworkHome(GetHeadNumber(PhoneNumber));
-        textNetwork.setText( "Network : "+ is_network);
+        textNetwork.setText(is_network);
     }
 
     private String GetHeadNumber(String PhoneNumber){
         String NumberHead = "";
         String[] data = PhoneNumber.split("");
-        for(int i = 0 ; i < 2 ; i++){
+        for(int i = 1 ; i < 4 ; i++){
            NumberHead += data[i];
         }
         return NumberHead;
+    }
+
+    private void CallPhone(final String phoneNumber) {
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            String dial = phoneNumber;
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse(String.format("tel:%s",dial)));
+            if (ActivityCompat.checkSelfPermission(CallingActivity.this,
+                    Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            startActivity(callIntent);
+        }
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
@@ -110,14 +125,6 @@ public class CallingActivity extends AppCompatActivity implements
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_cancel:
-                recognizer.stop();
-                recognizer.cancel();
-                recognizer.shutdown();
-                Intent startIntent = new Intent(this, DialActivity.class);
-                startActivity(startIntent);
-                finish();
-                break;
             default:
                 break;
         }
@@ -126,13 +133,13 @@ public class CallingActivity extends AppCompatActivity implements
     private String CheckNetworkHome(String head){
         String headNumber = "";
         if(head.equals("03") || head.equals("097") || head.equals("098") || head.equals("096") || head.equals("086")){
-            headNumber = "Vietel Network" + "cước phí 1300p";
+            headNumber = PhoneNumber + " : Mạng  Vietel" + "\ncước phí 1300p";
         }else if(head.equals("07")|| head.equals("089") || head.equals("090") || head.equals("093") ){
-            headNumber = "Mobifone Network" + "cước phí 1500p";
+            headNumber = PhoneNumber + ": Mạng  Mobifone" + "\ncước phí 1500p";
         }else if(head.equals("08")|| head.equals("088") || head.equals("094") || head.equals("091") ){
-            headNumber = "Vinaphone Network" + "cước phí 1400p";
+            headNumber = PhoneNumber +  ": Vinaphone " + "\ncước phí 1400p";
         }else {
-            headNumber = "Unknown Network" + "cước phí ?";
+            headNumber = PhoneNumber +  ": Mạng không xác định" + "\ncước phí ?";
         }
         return headNumber;
     }
@@ -148,17 +155,10 @@ public class CallingActivity extends AppCompatActivity implements
             return;
 
         String text = hypothesis.getHypstr();
-        if (text.equals(CANCEL)) {
-            Toast.makeText(CallingActivity.this , "Call End" , Toast.LENGTH_LONG).show();
+        if (text.equals(DIAL)) {
             recognizer.stop();
-            final Intent pocketIntent = new Intent(CallingActivity.this, PocketSphinxActivity.class);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    startActivity(pocketIntent);
-                    finish();
-                }
-            }, 3000);
+            Toast.makeText(CallingActivity.this , "CALLING" , Toast.LENGTH_LONG).show();
+            CallPhone(PhoneNumber);
         }
     }
 
@@ -206,7 +206,7 @@ public class CallingActivity extends AppCompatActivity implements
         recognizer.addListener(this);
 
         // Create keyword-activation search.
-        recognizer.addKeyphraseSearch(KWS_SEARCH, CANCEL);
+        recognizer.addKeyphraseSearch(KWS_SEARCH, DIAL);
     }
 
     @Override

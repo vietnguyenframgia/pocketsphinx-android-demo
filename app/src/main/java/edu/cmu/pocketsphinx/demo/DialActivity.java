@@ -7,11 +7,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TabHost;
@@ -55,8 +57,6 @@ public class DialActivity extends AppCompatActivity implements
 
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
-        btn_call = findViewById(R.id.btn_dial);
-        btn_call.setOnClickListener(this);
         txtResults = findViewById(R.id.result_text);
         txtCaption = findViewById(R.id.dial_text);
 
@@ -112,37 +112,26 @@ public class DialActivity extends AppCompatActivity implements
         return false;
     }
 
-    private boolean checkPermission(String permission) {
-        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
-    }
-
     private void CallPhone(final String phoneNumber) {
         if (!TextUtils.isEmpty(phoneNumber)) {
-            if (checkPermission(Manifest.permission.CALL_PHONE)) {
-                String dial = phoneNumber;
-                Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(dial));
-                callIntent.setData(Uri.parse(phoneNumber));
-                startActivity(callIntent);
+            Log.i("DialActivity", "CallPhone: " + phoneNumber);
+            String dial = phoneNumber;
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse(String.format("tel:%s",dial)));
+            if (ActivityCompat.checkSelfPermission(DialActivity.this,
+                    Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
+            startActivity(callIntent);
         }
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_dial:
-                if(!isTelephoneEnabled()){
-                    String phone_number = txtResults.getText().toString();
-                    //CallPhone(phone_number);
-//                    Intent callingIntent = new Intent(this, CallingActivity.class);
-//                    callingIntent.putExtra("" , phone_number);
-//                    startActivity(callingIntent);
-//                    finish();
-                }else {
-                    Toast.makeText(DialActivity.this, "FALSE" , Toast.LENGTH_LONG).show();
-                }
-
-                break;
+//            case R.id.btn_dial:
+//                CallPhone("0963638496");
+//                break;
             default:
                 break;
         }
@@ -171,7 +160,7 @@ public class DialActivity extends AppCompatActivity implements
         String phoneNumber = "" ;
         String text = "" ;
         String[] arrPhone = number.split(" ");
-        for(int i = 1 ; i < arrPhone.length ; i++) {
+        for(int i = 0 ; i < arrPhone.length ; i++) {
             switch (arrPhone[i]) {
                 case "zero":
                     text = "0";
@@ -206,7 +195,7 @@ public class DialActivity extends AppCompatActivity implements
                 default:
                     break;
             }
-            phoneNumber = "+84" + phoneNumber + text;
+            phoneNumber = phoneNumber + text;
         }
 
         return phoneNumber;
@@ -214,9 +203,8 @@ public class DialActivity extends AppCompatActivity implements
 
     private boolean CheckHeadNumber(String number){
         boolean is_ok = false;
-        String headNumber = number ;
         String[] arrPhone = number.split("");
-        if(arrPhone[0].equals("0")){
+        if(arrPhone[1].equals("0")){
             is_ok = true;
         }else{
             is_ok = false;
@@ -231,23 +219,17 @@ public class DialActivity extends AppCompatActivity implements
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
-            String PhoneNumber = DataProcess(text);
+            String PhoneNumber = "0963638496";
+            txtResults.setText(PhoneNumber);
             if(CheckHeadNumber(PhoneNumber)){
-                txtResults.setText(PhoneNumber);
                 int number = PhoneNumber.length();
-                if(number >= 10){
+                if(number == 10){
                     recognizer.stop();
+                    //CallPhone(PhoneNumber);
                     final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
-                    intentCalling.putExtra("" , PhoneNumber);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            startActivity(intentCalling);
-                            finish();
-                        }
-                    }, 3000);
-                }else {
-                    switchSearch(DIGITS_SEARCH);
+                    intentCalling.putExtra("phoneNumber" , PhoneNumber);
+                    startActivity(intentCalling);
+                    finish();
                 }
             }else {
                 switchSearch(DIGITS_SEARCH);
