@@ -44,7 +44,6 @@ public class DialActivity extends AppCompatActivity implements
 
     private SpeechRecognizer recognizer;
     TelephonyManager mTelephonyManager;
-    private Button btn_call;
     private TextView txtResults;
     private TextView txtCaption;
 
@@ -112,20 +111,6 @@ public class DialActivity extends AppCompatActivity implements
         return false;
     }
 
-    private void CallPhone(final String phoneNumber) {
-        if (!TextUtils.isEmpty(phoneNumber)) {
-            Log.i("DialActivity", "CallPhone: " + phoneNumber);
-            String dial = phoneNumber;
-            Intent callIntent = new Intent(Intent.ACTION_CALL);
-            callIntent.setData(Uri.parse(String.format("tel:%s",dial)));
-            if (ActivityCompat.checkSelfPermission(DialActivity.this,
-                    Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            startActivity(callIntent);
-        }
-    }
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -150,7 +135,7 @@ public class DialActivity extends AppCompatActivity implements
         String text = hypothesis.getHypstr();
         if (text.equals(READ_DIGIT)) {
             recognizer.stop();
-            Toast.makeText(DialActivity.this, "READ DIGITS" , Toast.LENGTH_LONG).show();
+            Toast.makeText(DialActivity.this, "OK" , Toast.LENGTH_LONG).show();
             txtCaption.setText("Đọc số điện thoại của bạn (Tiếng Anh)");
             switchSearch(DIGITS_SEARCH);
         }
@@ -219,20 +204,31 @@ public class DialActivity extends AppCompatActivity implements
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
-            String PhoneNumber = "0963638496";
-            txtResults.setText(PhoneNumber);
-            if(CheckHeadNumber(PhoneNumber)){
+            if(!text.equals("number")) {
+                String PhoneNumber = DataProcess(text);
+                txtResults.setText(PhoneNumber);
                 int number = PhoneNumber.length();
-                if(number == 10){
-                    recognizer.stop();
-                    //CallPhone(PhoneNumber);
-                    final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
-                    intentCalling.putExtra("phoneNumber" , PhoneNumber);
-                    startActivity(intentCalling);
-                    finish();
+                if (number >= 10) {
+                    if (CheckHeadNumber(PhoneNumber)) {
+                        Toast.makeText(DialActivity.this, "sẵn sàng để gọi", Toast.LENGTH_LONG).show();
+                        recognizer.stop();
+                        final Intent intentCalling = new Intent(DialActivity.this, CallingActivity.class);
+                        intentCalling.putExtra("phoneNumber", PhoneNumber);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                startActivity(intentCalling);
+                                finish();
+                            }
+                        }, 1000);
+                    }else {
+                        Toast.makeText(DialActivity.this, "Kiểm tra lại đầu số (0...) ", Toast.LENGTH_LONG).show();
+                        switchSearch(DIGITS_SEARCH);
+                    }
+                } else {
+                    Toast.makeText(DialActivity.this, "Kiểm tra lại số điện thoại (10 số)", Toast.LENGTH_LONG).show();
+                    switchSearch(DIGITS_SEARCH);
                 }
-            }else {
-                switchSearch(DIGITS_SEARCH);
             }
         }
     }

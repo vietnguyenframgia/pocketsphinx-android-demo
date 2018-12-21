@@ -19,12 +19,12 @@
 
         <TextView
             android:id="@+id/txtNetwork"
-            android:textAlignment="center"
+            android:gravity="center"
             android:layout_marginTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textColor="#000"
-            android:textSize="30dp" />
+            android:textSize="25dp" />
 
         </LinearLayout>
 
@@ -37,12 +37,12 @@
                 tools:ignore="Suspicious0dp">
 
             <TextView
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="70dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Gọi đến số"
-                android:textSize="35dp"
+                android:textSize="30dp"
                 android:textColor="#f000"
                 />
             <TextView
@@ -54,10 +54,10 @@
                 android:layout_weight="0.4"
                 android:gravity="center"
                 android:text=""
-                android:textSize="40dp" />
+                android:textSize="30dp" />
 
             <LinearLayout
-                android:layout_marginTop="70dp"
+                android:layout_marginTop="80dp"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center"

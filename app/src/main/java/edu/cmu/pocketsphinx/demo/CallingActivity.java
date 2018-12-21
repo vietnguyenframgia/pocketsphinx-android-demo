@@ -132,16 +132,27 @@ public class CallingActivity extends AppCompatActivity implements
 
     private String CheckNetworkHome(String head){
         String headNumber = "";
-        if(head.equals("03") || head.equals("097") || head.equals("098") || head.equals("096") || head.equals("086")){
-            headNumber = PhoneNumber + " : Mạng  Vietel" + "\ncước phí 1300p";
-        }else if(head.equals("07")|| head.equals("089") || head.equals("090") || head.equals("093") ){
-            headNumber = PhoneNumber + ": Mạng  Mobifone" + "\ncước phí 1500p";
-        }else if(head.equals("08")|| head.equals("088") || head.equals("094") || head.equals("091") ){
-            headNumber = PhoneNumber +  ": Vinaphone " + "\ncước phí 1400p";
+        if(head.equals("032") ||head.equals("033") ||head.equals("034") ||head.equals("035") ||head.equals("036") ||head.equals("037") ||head.equals("038") || head.equals("039") || head.equals("097") || head.equals("098") || head.equals("096") || head.equals("086")){
+            headNumber = PhoneNumber + " : Mạng  Vietel";
+        }else if(head.equals("070") ||head.equals("079") ||head.equals("077") ||head.equals("076") ||head.equals("078") ||head.equals("089") || head.equals("090") || head.equals("093") ){
+            headNumber = PhoneNumber + ": Mạng  Mobifone" ;
+        }else if(head.equals("081") ||head.equals("082") ||head.equals("083") ||head.equals("084") ||head.equals("085") || head.equals("088") || head.equals("094") || head.equals("091") ){
+            headNumber = PhoneNumber +  ": Mạng Vinaphone ";
+        }else if(head.equals("092") ||head.equals("056") ||head.equals("058")) {
+            headNumber = PhoneNumber +  ": Mạng Vietnamobie ";
+        }else if(head.equals("099") ||head.equals("059")) {
+            headNumber = PhoneNumber +  ": Mạng Gmobie ";
         }else {
-            headNumber = PhoneNumber +  ": Mạng không xác định" + "\ncước phí ?";
+            headNumber = PhoneNumber +  ": Mạng không xác định";
         }
         return headNumber;
+    }
+
+    @Override
+    public void onBackPressed() {
+        final Intent intentCalling = new Intent(CallingActivity.this, DialActivity.class);
+        startActivity(intentCalling);
+        finish();
     }
 
     /**
@@ -157,7 +168,7 @@ public class CallingActivity extends AppCompatActivity implements
         String text = hypothesis.getHypstr();
         if (text.equals(DIAL)) {
             recognizer.stop();
-            Toast.makeText(CallingActivity.this , "CALLING" , Toast.LENGTH_LONG).show();
+            Toast.makeText(CallingActivity.this , "Đang gọi" , Toast.LENGTH_LONG).show();
             CallPhone(PhoneNumber);
         }
     }
